@@ -10,7 +10,11 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf-cloud/hyperf/blob/master/LICENSE
  */
 
+use \App\Middleware\RecordLogMiddleware;
+
 return [
     'http' => [
+        // 请求日志
+        RecordLogMiddleware::class
     ],
 ];

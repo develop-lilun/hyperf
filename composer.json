@@ -24,7 +24,9 @@
         "hyperf/logger": "~1.1.0",
         "hyperf/memory": "~1.1.0",
         "hyperf/process": "~1.1.0",
-        "hyperf/redis": "~1.1.0"
+        "hyperf/redis": "~1.1.0",
+        "hyperf/validation": "^1.1",
+        "hyperf/translation": "^1.1"
     },
     "require-dev": {
         "swoft/swoole-ide-helper": "^4.2",

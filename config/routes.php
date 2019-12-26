@@ -13,3 +13,15 @@ declare(strict_types=1);
 use Hyperf\HttpServer\Router\Router;
 
 Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'App\Controller\IndexController@index');
+
+Router::addGroup('/admin/', function () {
+    Router::post('v1/user/foo', [\App\Controller\Admin\V1\UserController::class,'foo']);
+    Router::post('v1/user/ccc', [\App\Controller\Admin\V1\UserController::class, 'ccc']);
+
+
+}, ['middleware' => []]);
+
+Router::addGroup('/api', function () {
+
+
+});
