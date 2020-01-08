@@ -15,6 +15,6 @@ use \App\Middleware\RecordLogMiddleware;
 return [
     'http' => [
         // 请求日志
-        RecordLogMiddleware::class
+//        RecordLogMiddleware::class
     ],
 ];

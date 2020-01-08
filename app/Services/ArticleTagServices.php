@@ -25,7 +25,7 @@ class ArticleTagServices
         $order = $params['order'] ?? 'desc';
 
         // 列表
-        $list = ArticleTagModel::getList($queryDate, $page, $perPage, $sort, $order);
+        $list = ArticleTagModel::getListContainer($queryDate, $page, $perPage, $sort, $order);
         // 总数
         $count = ArticleTagModel::getCount($queryDate);
         return ['list' => $list, 'count' => $count];

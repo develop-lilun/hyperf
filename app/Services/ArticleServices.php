@@ -56,7 +56,8 @@ class ArticleServices
     {
 
         // 条件数据
-        $queryDate = Common::arrayOnly($params,['article_category_id', 'user_id', 'article_platform_id', 'is_disables', 'audit_status', 'push_platform']);
+        $queryDate = Common::arrayOnly($params,
+            ['article_category_id', 'user_id', 'article_platform_id', 'is_disables', 'audit_status', 'push_platform']);
 
         // 其他特定条件
         $queryRaw = '';
@@ -76,7 +77,7 @@ class ArticleServices
             $queryDate[] = ['created_at', '<=', $params['end_time']];
         }
         if (isset($params['remark'])) {
-            $queryDate[] = ['remark', 'like', '%' .  ['remark'] . '%'];
+            $queryDate[] = ['remark', 'like', '%' . ['remark'] . '%'];
         }
 
         // 排序数据
@@ -108,16 +109,34 @@ class ArticleServices
     public function addEdit($params)
     {
         // 数据组装
-        $field = ['title', 'seo_title', 'seo_keywords', 'description', 'preview', 'content', 'article_category_id', 'article_platform_id',
-            'no_name', 'thumb_pic_id', 'praise_num', 'comment_num', 'read_num',
-            'collect_num', 'share_num', 'invitation', 'integral_num', 'is_disables', 'push_time'];
+        $field = [
+            'title',
+            'seo_title',
+            'seo_keywords',
+            'description',
+            'preview',
+            'content',
+            'article_category_id',
+            'article_platform_id',
+            'no_name',
+            'thumb_pic_id',
+            'praise_num',
+            'comment_num',
+            'read_num',
+            'collect_num',
+            'share_num',
+            'invitation',
+            'integral_num',
+            'is_disables',
+            'push_time'
+        ];
         $data = Common::arrayOnly($params, $field);
 
         if (isset($params['article_tag_ids'])) {
             $data['article_tag_ids'] = join(',', $params['article_tag_ids']);
         }
-        if(isset($params['push_time'])){
-            $data['push_time'] = $params['push_time'] == '' ? NULL : $params['push_time'];
+        if (isset($params['push_time'])) {
+            $data['push_time'] = $params['push_time'] == '' ? null : $params['push_time'];
         }
 
         $ArticleModel = new ArticleModel();
@@ -141,7 +160,7 @@ class ArticleServices
                     ArticleAuditModel::insert($auditData);
 
                 }
-                if(isset($data['push_time'])){
+                if (isset($data['push_time'])) {
                     $data['created_at'] = $data['push_time'];
                     $data['updated_at'] = $data['push_time'];
                 }
@@ -210,7 +229,7 @@ class ArticleServices
     /**
      * 首页文章数据处理
      *
-     * @Cacheable(prefix="get_article_list", ttl=300, value="_#{params.page}_#{params.per_page}_#{params.article_category_id}_#{params.article_tag_id}", listener="article-update")
+     * @Cacheable(prefix="get_article_list", ttl=60, value="_#{params.page}_#{params.per_page}_#{params.article_category_id}_#{params.article_tag_id}", listener="article-update")
      * @param $params
      * @param $field
      *
@@ -237,7 +256,20 @@ class ArticleServices
         $order = $params['order'] ?? 'desc';
 
         // 列表
-        $field = ['id', 'title', 'description', 'article_category_id', 'push_platform', 'user_id', 'thumb_pic_id', 'no_name', 'read_num', 'praise_num', 'updated_at as created_at', 'push_time'];
+        $field = [
+            'id',
+            'title',
+            'description',
+            'article_category_id',
+            'push_platform',
+            'user_id',
+            'thumb_pic_id',
+            'no_name',
+            'read_num',
+            'praise_num',
+            'updated_at as created_at',
+            'push_time'
+        ];
         $list = ArticleModel::getList($queryDate, $page, $perPage, $sort, $order, $field, $whereRaw);
 
         // 数据处理
@@ -251,7 +283,7 @@ class ArticleServices
     /**
      * 热门文章数据
      *
-     * @Cacheable(prefix="get_hot_article_list", ttl=300, listener="article_update")
+     * @Cacheable(prefix="get_hot_article_list", ttl=300)
      * @return array
      */
     public function getHotArticleList()
@@ -324,19 +356,20 @@ class ArticleServices
             $categoryData = $this->articleCategoryServices->getCategoryNameByIds($categoryIdsArray);
         }
         if ($platformIdsArray) {
-            $platformData =  $this->articlePlatformService->getPlatformNameByIds($platformIdsArray);
+            $platformData = $this->articlePlatformService->getPlatformNameByIds($platformIdsArray);
         }
         if ($picIdsArray) {
             $picData = $this->uploadServices->getFileIdsToUrl($picIdsArray);
         }
         if ($userIdsArray) {
-            $userData =$this->userServices->getUserList($userIdsArray);
+            $userData = $this->userServices->getUserList($userIdsArray);
         }
 
         // 将标签 平台 分类查询信息 组装返回
         foreach ($data as $key => $value) {
             if (isset($value['article_tag_ids'])) {
-                $data[$key]['article_tag_ids'] = $value['article_tag_ids'] ? explode(',', $value['article_tag_ids']) : [];
+                $data[$key]['article_tag_ids'] = $value['article_tag_ids'] ? explode(',',
+                    $value['article_tag_ids']) : [];
                 $tagNameArray = [];
                 foreach ($data[$key]['article_tag_ids'] as $k => $v) {
                     $tagNameArray[] = $tagData[$v] ?? '';
@@ -347,7 +380,7 @@ class ArticleServices
             if (isset($value['article_category_id'])) {
                 $data[$key]['article_category_name'] = $categoryData[$value['article_category_id']] ?? '';
             }
-            if (isset($value['article_platform_id']) ) {
+            if (isset($value['article_platform_id'])) {
                 $data[$key]['article_platform_name'] = $platformData[$value['article_platform_id']] ?? '';
             }
             if (isset($value['thumb_pic_id'])) {
@@ -384,22 +417,20 @@ class ArticleServices
         $data = Common::arrayOnly($params, $field);
 
         $data['seo_title'] = $data['title'] ?? '';
-        $data['description'] = msUbStr(clearTags($data['content']), 200);
+        $data['description'] = Common::msUbStr(Common::clearTags($data['content']), 200);
         $data['audit_status'] = 0;
 
         if (isset($params['article_tag_ids'])) {
-            $data['article_tag_ids'] = join(',', $params['article_tag_ids']);
-            $data['seo_keywords'] = $this->dataDispose([['article_tag_ids' => $data['article_tag_ids']]])[0]['article_tag_names'] ?? '';
+            $tagData = $this->articleTagServices->getTagNameByIds($params['article_tag_ids']);
+            $data['seo_keywords'] = join(',', $tagData);
         }
-        $ArticleModel = new ArticleModel();
-        if(isset($params['id']) && $params['id']){
-            $result = ArticleModel::where(['id' => $params['id']])->update($data);
-        }else{
-
+        if (isset($params['id']) && $params['id']) {
+            $result = ArticleModel::query()->where(['id' => $params['id']])->update($data);
+        } else {
             $data['user_id'] = $params['user_info']['user_id'];
             $data['author'] = $params['user_info']['user_name'];
             $data['created_at'] = date('Y-m-d H:i:s');
-            $result = ArticleModel::insertGetId($data);
+            $result = ArticleModel::query()->insertGetId($data);
         }
         return $result;
     }
@@ -414,10 +445,26 @@ class ArticleServices
     public function articleInfo($params)
     {
         // 获取信息
-        $ArticleModel = new ArticleModel();
-        $filed = ['id', 'title', 'seo_title', 'article_tag_ids', 'seo_keywords', 'description', 'preview', 'content', 'user_id', 'no_name',
-            'praise_num', 'comment_num', 'read_num', 'collect_num', 'integral_num', 'created_at', 'push_time'];
-        $result = ArticleModel::where(['id' => $params['id']])->first($filed)->toArray();
+        $filed = [
+            'id',
+            'title',
+            'seo_title',
+            'article_tag_ids',
+            'seo_keywords',
+            'description',
+            'preview',
+            'content',
+            'user_id',
+            'no_name',
+            'praise_num',
+            'comment_num',
+            'read_num',
+            'collect_num',
+            'integral_num',
+            'created_at',
+            'push_time'
+        ];
+        $result = ArticleModel::query()->where(['id' => $params['id']])->first($filed)->toArray();
 
         return $result;
     }
@@ -450,53 +497,25 @@ class ArticleServices
      */
     public function recommendArticle($articleTagIds)
     {
-        $articleModel = new ArticleModel();
-        $field = ['id', 'title','user_id', 'no_name', 'thumb_pic_id', 'read_num', 'created_at', 'push_time'];
-        $whereRaw = '';
+        $field = ['id', 'title', 'user_id', 'no_name', 'thumb_pic_id', 'read_num', 'created_at', 'push_time'];
+        $time = date('Y-m-d H:i:s');
+        $startTime = date('Y-m-d', strtotime("-29 day"));  // 取最近一个月的数据
+        $whereRaw = " audit_status in(1, 3) AND ((push_time is NULL AND  created_at > '$startTime') OR (push_time > '$startTime' AND push_time <= '$time'))";
         $articleTagArray = array_filter(explode(',', $articleTagIds));
         foreach ($articleTagArray as $key => $value) {
+            if ($key == 0){
+                $whereRaw .= ' AND (';
+            }
             if ($key > 0) {
                 $whereRaw .= ' OR ';
             }
             $whereRaw .= "FIND_IN_SET($value, `article_tag_ids`)";
+            if($key == count($articleTagArray) - 1){
+                $whereRaw .= ')';
+            }
         }
-       if($whereRaw){
-           $articleModel = articleModel::whereRaw("($whereRaw)");
-       }
-        $time = date('Y-m-d H:i:s');
-        $startTime = date('Y-m-d', strtotime("-29 day"));  // 取最近一个月的数据
-        $list = $articleModel
-            ->whereIn('audit_status', [1, 3])
-            ->whereRaw("((push_time is NULL AND  created_at > '$startTime') or (push_time > '$startTime' AND push_time <= '$time'))")
-            ->where(['is_disables' => 0])
-            ->orderBy('read_num', 'desc')
-            ->limit(6)
-            ->get($field)
-            ->toArray();
-        $list = $this->dataDispose($list,1);
-        return $list;
-    }
 
-    /**
-     * 作者最近文章
-     *
-     * @param $userId
-     *
-     * @return array
-     */
-    public function userRecentArticle($userId)
-    {
-        $ArticleModel = new ArticleModel();
-        $field = ['id', 'title', 'created_at', 'push_time'];
-        $time = date('Y-m-d H:i:s');
-        $list = $ArticleModel
-            ->whereIn('audit_status', [1, 3])
-            ->whereRaw("(push_time is NULL or push_time <= '$time')")
-            ->where(['is_disables' => 0, 'user_id' => $userId, 'no_name' => 0])
-            ->orderBy('created_at', 'desc')
-            ->limit(3)
-            ->get($field)
-            ->toArray();
+        $list = ArticleModel::getList(['is_disables' => 0], 1, 6, 'read_num', 'desc', $field, $whereRaw);
         $list = $this->dataDispose($list, 1);
         return $list;
     }
@@ -508,16 +527,16 @@ class ArticleServices
      */
     public function getListByIds($ids = [])
     {
-        $ArticleModel = new ArticleModel();
         $field = ['id', 'title', 'description', 'user_id', 'no_name', 'thumb_pic_id', 'read_num', 'collect_num'];
-        $list =  ArticleModel::whereIn('id', $ids)->where(['is_disables' => 0])->get($field)->toArray();
+        $list = ArticleModel::query()->whereIn('id', $ids)->where(['is_disables' => 0])->get($field)->toArray();
         $list = $this->dataDispose($list);
         $result = [];
-        foreach ($list as $value){
+        foreach ($list as $value) {
             $result[$value['id']] = $value;
         }
         return $result;
     }
+
     /**
      * 根据id 返回 信息
      * @param array $ids
@@ -526,12 +545,8 @@ class ArticleServices
     public function getTitleByIds($ids = [])
     {
         $field = ['id', 'title', 'read_num', 'praise_num'];
-        $list =  ArticleModel::whereIn('id', $ids)->where(['is_disables' => 0])->get($field)->toArray();
-        $result = [];
-        foreach ($list as $value){
-            $result[$value['id']] = $value;
-        }
-        return $result;
+        $list = ArticleModel::query()->whereIn('id', $ids)->where(['is_disables' => 0])->get($field)->toArray();
+        return array_column($list, null, 'id');
     }
 
     /**
@@ -542,12 +557,12 @@ class ArticleServices
     public function HomeDataDispose($list)
     {
         $articleIds = [];
-        foreach ($list as $value){
+        foreach ($list as $value) {
             $articleIds[] = $value['id'];
         }
         $resultData = $this->getTitleByIds($articleIds);
 
-        foreach ($list as $key => $value){
+        foreach ($list as $key => $value) {
             $list[$key]['read_num'] = $resultData[$value['id']]['read_num'] ?? 0;
             $list[$key]['praise_num'] = $resultData[$value['id']]['praise_num'] ?? 0;
         }

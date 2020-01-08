@@ -86,7 +86,7 @@ class ArticleCategoryServices
 
     /**
      * 获取顶级文章分类
-     * @Cacheable(prefix="article_category_all", ttl=1000, listener="user-update")
+     * @Cacheable(prefix="article_category_all", ttl=1000)
      * @return mixed
      */
     public function listAll()

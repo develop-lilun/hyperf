@@ -25,7 +25,7 @@ class ArticlePlatformServices
         $order = $params['order'] ?? 'desc';
 
         // 列表
-        $list = ArticlePlatformModel::getList($queryDate, $page, $perPage, $sort, $order);
+        $list = ArticlePlatformModel::getListContainer($queryDate, $page, $perPage, $sort, $order);
         // 总数
         $count = ArticlePlatformModel::getCount($queryDate);
         return ['list' => $list, 'count' => $count];

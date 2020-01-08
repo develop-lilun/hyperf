@@ -42,9 +42,8 @@ class RecordLogMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $this->logger->info('request', array_merge(['path' => $this->request->getPathInfo(), 'method' => $this->request->getMethod()], $this->request->all()));
         $response =  $handler->handle($request);
-        $this->logger->info('response', ['code' => $response->getStatusCode()]);
+        $this->logger->info('request', array_merge(['path' => $this->request->getPathInfo(), 'method' => $this->request->getMethod()], $this->request->all(), ['code' => $response->getStatusCode()]));
         return $response;
     }
 }

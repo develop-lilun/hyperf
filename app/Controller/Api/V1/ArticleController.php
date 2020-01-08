@@ -60,9 +60,6 @@ class ArticleController extends BaseController
         // 列表数据
         $list  = $this->articleServices->getArticleList($params);
 
-        // 走缓存时处理实时阅读量和收藏数
-        $list['list'] = $list ? $this->articleServices->HomeDataDispose($list['list']) : [];
-
         // 数据返回
         $result = [
             'list' => $list['list'],
@@ -72,8 +69,6 @@ class ArticleController extends BaseController
         return $this->success($result);
     }
 
-
-
     /**
      * 热门文章
      * @return array
@@ -82,5 +77,99 @@ class ArticleController extends BaseController
     {
         $list =  $this->articleServices->getHotArticleList();
         return $this->success(['list' => $list]);
+    }
+
+    /**
+     * 用户发帖
+     * @return array
+     */
+    public function add()
+    {
+        $params = $this->request->all();
+        // 数据验证
+        $restValidate = $this->articleValidate->addValidate($params);
+        if ($restValidate['status'] !== true) {
+            return $this->error($restValidate['message']);
+        }
+
+        // 数据处理
+        $ArticleServices = new ArticleServices();
+        $result = $ArticleServices->userAddOrEditArticle($params);
+        if (!$result) {
+            return $this->error('-201');
+        }
+
+        return $this->success();
+    }
+
+    /**
+     * 文章详细接口
+     * @return array
+     */
+    public function info()
+    {
+        $params = $this->request->all();
+        // 数据验证
+        $restValidate = $this->articleValidate->infoValidate($params);
+        if ($restValidate['status'] !== true) {
+            return $this->error($restValidate['message']);
+        }
+
+        // 查询文章详情
+        $ArticleServices = new ArticleServices();
+        $info = $ArticleServices->articleInfo($params);
+
+        // 文章详情结果
+        $resultInfo = $ArticleServices->articleDataDispose($info);
+
+        // 是否点赞收藏
+        $resultInfo['is_collect'] = 0;
+        $resultInfo['is_praise'] = 0;
+        $resultInfo['is_buy'] = 0;
+        if (isset($params['user_info']['user_id'])) {
+            $uid = $params['user_info']['user_id'];
+            // 用户收藏信息
+            $userCollectServices = new UserCollectServices();
+            $collect = $userCollectServices->userIsCollect($uid, $resultInfo['id'], UserCollectModel::TYPE_ARTICLE);
+            $resultInfo['is_collect'] = $collect > 0 ? 1 : 0;
+
+            // 用户点赞信息
+            $userPraiseServices = new UserPraiseServices();
+            $praise = $userPraiseServices->userIsPraise($uid, $resultInfo['id'], UserPraiseModel::TYPE_ARTICLE);
+            $resultInfo['is_praise'] = $praise > 0 ? 1 : 0;
+
+            // 本人不需要积分查看 || 是否满足等级优势权益
+            $userServices = new UserServices();
+            if($resultInfo['user_id'] == $uid || $userServices->isLevelBenefit($uid, $resultInfo['user_id'])){
+                $resultInfo['integral_num'] = 0;
+            }
+        }
+
+        // 是否已积分兑换
+        if($resultInfo['integral_num'] > 0){
+            $content = $resultInfo['preview'] ?: '';
+            if(isset($params['user_info']['user_id'])){
+                $userIntegralLogServices = new UserIntegralLogServices();
+                $isBuy = $userIntegralLogServices->issetLog(['user_id' => $uid, 'type' => UserIntegralLogModel::TYPE_DECREASE, 'reason_key' => config('integral.article_by_buy.key'), 'join_id' => $resultInfo['id']]);
+                //是否兑换过
+                if($isBuy > 0){
+                    $content = $resultInfo['content'];
+                    $resultInfo['is_buy'] = 1;
+                }
+            }
+            $resultInfo['content'] = $content;
+        }
+
+        // 推荐文章
+        $recommendArticle = $ArticleServices->recommendArticle($info['article_tag_ids']);
+
+        // 文章浏览成功事件
+        event(new UserReadAddSuccess($params['user_info']['user_id'] ?? 0, UserFootprintModel::TYPE_ARTICLE, $params['id']));
+
+        $result = [
+            'info' => $resultInfo,
+            'recommend_article' => $recommendArticle,
+        ];
+        return $this->success($result);
     }
 }

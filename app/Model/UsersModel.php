@@ -34,9 +34,7 @@ class UsersModel extends BaseModel
      */
     public function getUserInfo($mobile)
     {
-        $data = self::query()->select(['mobile', 'password'])->where(['mobile' => $mobile])->get()->toArray();
-
-        return $data;
+        return self::query()->select(['mobile', 'password'])->where(['mobile' => $mobile])->get()->toArray();
     }
 
 
@@ -46,9 +44,7 @@ class UsersModel extends BaseModel
      */
     public function getUserInfoEvent($mobile)
     {
-        $data = self::query()->select(['mobile', 'password', 'id'])->where(['mobile' => $mobile])->first();
-
-        return $data;
+        return self::query()->select(['mobile', 'password', 'id'])->where(['mobile' => $mobile])->first();
     }
 
 
@@ -142,7 +138,7 @@ class UsersModel extends BaseModel
      *
      * @return mixed
      */
-    public function userInfo($field, $whereAry = [])
+    public function getUserList($field, $whereAry = [])
     {
         return UsersModel::query()->select($field)->where($whereAry)->get()->toArray();
     }
