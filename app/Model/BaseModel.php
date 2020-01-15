@@ -21,18 +21,15 @@ class BaseModel extends Model
      *
      * @return mixed
      */
-    public static function getListContainer(array $queryDate, int $page, int $perPage, string $sort, string $order, array $field = [])
+    public static function getListContainer(array $queryDate, int $page, int $perPage, string $sort, string $order, array $field = ['*'])
     {
-        $field = $field ?: ['*'];
         return self::query()->where($queryDate)->forPage($page, $perPage)->select($field)->orderBy($sort,
             $order)->get()->toArray();
     }
 
     /**
      * 查询总数量
-     *
      * @param $queryDate
-     *
      * @return mixed
      */
     public static function getCount(array $queryDate)
@@ -42,8 +39,8 @@ class BaseModel extends Model
 
     /**
      * 批量删除数据
-     *
-     * @param $ids int|array
+     * @param array $ids
+     * @return int|mixed
      */
     public static function dropIds(array $ids)
     {

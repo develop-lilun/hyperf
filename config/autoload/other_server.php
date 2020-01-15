@@ -3,7 +3,7 @@
 return [
 
     // 微服务base_url
-    'base_url' => env('BASE_URL', 'http://192.168.0.137:8888'),
+    'base_url' => env('BASE_URL', 'http://192.168.7.137:8888'),
 
     'admin_user_info' => '/admin/current/user',                             // 后台用户信息
     'api_user_url' => '/plat/user/get/info',                                //前台用户信息调用接口

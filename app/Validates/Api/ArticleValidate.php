@@ -6,6 +6,7 @@ namespace App\Validates\Api;
 
 
 use App\Model\ArticleModel;
+use App\Services\UserServices;
 use App\Validates\BaseValidate;
 use Hyperf\Validation\Rule;
 
@@ -72,6 +73,9 @@ class ArticleValidate extends BaseValidate
         ];
         $rest_validate = $this->validate($requestData, $rules);
         if ($rest_validate === true) {
+            // 获取当前用户id
+            $userId = UserServices::getUid();
+
             // 是否需要邀请码查看
             $articleInfo = ArticleModel::getFirst($requestData['id'], ['invitation', 'user_id']);
 
@@ -81,7 +85,7 @@ class ArticleValidate extends BaseValidate
             }
 
             // 本人不需要验证邀请码
-            if ((isset($requestData['user_info']['user_id']) && $articleInfo['user_id'] == $requestData['user_info']['user_id'])) {
+            if ((isset($requestData['user_info']['user_id']) && $articleInfo['user_id'] == $userId)) {
                 return $this->baseSucceed();
             }
 

@@ -8,6 +8,7 @@ use App\Model\UsersModel;
 use Hyperf\Cache\Annotation\Cacheable;
 use Hyperf\Cache\Listener\DeleteListenerEvent;
 use Hyperf\Di\Annotation\Inject;
+use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\Context;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
@@ -15,16 +16,22 @@ use Psr\Log\LoggerInterface;
 class UserServices
 {
     /**
-     * @Inject()
      * @var LoggerInterface
      */
     protected $logger;
 
     /**
-     * @Inject()
      * @var EventDispatcherInterface
      */
     protected $dispatcher;
+
+
+
+    public function __construct(LoggerFactory $loggerFactory, EventDispatcherInterface $dispatcher)
+    {
+        $this->logger = $loggerFactory->get('user-server', 'user-server');
+//        $this->dispatcher = $dispatcher;
+    }
 
     /**
      * 用户信息
@@ -54,18 +61,17 @@ class UserServices
         $info = UsersModel::getListByIds($id, ['user_id', 'nick', 'avatar']);
 
         //返回的数据格式
-        $userInfo = [
+        return [
             'user_id' => $info['user_id'],
             'user_name' => $info['nick'],
             'face_url' => $info['avatar']
         ];
-        return $userInfo;
     }
 
     /**
      * 获取微服务单个用户信息
      *
-     * @Cacheable(prefix="get_user_info", ttl=1800, value="_#{sid}", listener="user-update")
+     * @Cacheable (prefix="get_user_info", ttl=1800, value="_#{sid}", listener="user-update")
      * @param string $accessToken
      * @param string $sid
      * @return bool|mixed
@@ -76,16 +82,18 @@ class UserServices
             return false;
         }
 
+        // 获取用户中心-用户信息
         $result = $this->getOriginUserInfo($accessToken, $sid);
+        var_dump($result);
         $result = @json_decode($result, true);
 
+        // 验证是否存在
         if (!is_array($result) || !$result || !isset($result['code']) || $result['code'] != 0 || !isset($result['data']['userInfo'])) {
             return false;
         }
 
-        $userInfo = $result['data']['userInfo'];
-
         // 新用户使用默认地址默认头像地址 和昵称
+        $userInfo = $result['data']['userInfo'];
         $userInfo['avatar'] = $userInfo['avatar'] ?: config('app.user_default_avatar');
         $userInfo['nickname'] = $userInfo['nickname'] ?: Common::defaultNick();
 
@@ -98,6 +106,11 @@ class UserServices
         return $userInfo;
     }
 
+    /**
+     * 删除缓存
+     * @param $sid
+     * @return bool
+     */
     public function flushCache($sid)
     {
         $this->dispatcher->dispatch(new DeleteListenerEvent('user-update', [$sid]));
@@ -158,9 +171,9 @@ class UserServices
      *
      * @return bool|mixed
      */
-    public function getOriginUserInfo($accessToken = '', $sid = '')
+    public function getOriginUserInfo(string $accessToken = '', string $sid = '')
     {
-        $url = Common::getOtherServerUrl(config('services_config.api_user_url'));
+        $url = Common::getOtherServerUrl(config('other_server.api_user_url'));
         $header = ["token:$accessToken", "sessionId:$sid"];
         try {
             $result = Common::httpPostRequest($url, [], $header);

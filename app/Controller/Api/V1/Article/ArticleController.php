@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api\V1;
+namespace App\Controller\Api\V1\Article;
 
 
 use App\Controller\Api\BaseController;
 use App\Services\ArticleCategoryServices;
 use App\Services\ArticleServices;
+use App\Services\UserServices;
 use App\Validates\Api\ArticleValidate;
 use Hyperf\Di\Annotation\Inject;
 
@@ -109,11 +110,15 @@ class ArticleController extends BaseController
     public function info()
     {
         $params = $this->request->all();
+
         // 数据验证
         $restValidate = $this->articleValidate->infoValidate($params);
         if ($restValidate['status'] !== true) {
             return $this->error($restValidate['message']);
         }
+
+        // 获取当前用户id
+        $uid = UserServices::getUid();
 
         // 查询文章详情
         $ArticleServices = new ArticleServices();
@@ -126,8 +131,7 @@ class ArticleController extends BaseController
         $resultInfo['is_collect'] = 0;
         $resultInfo['is_praise'] = 0;
         $resultInfo['is_buy'] = 0;
-        if (isset($params['user_info']['user_id'])) {
-            $uid = $params['user_info']['user_id'];
+        if ($uid) {
             // 用户收藏信息
             $userCollectServices = new UserCollectServices();
             $collect = $userCollectServices->userIsCollect($uid, $resultInfo['id'], UserCollectModel::TYPE_ARTICLE);

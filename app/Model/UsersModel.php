@@ -126,8 +126,7 @@ class UsersModel extends BaseModel
      */
     public function getUserInfoByUid($arrUids = [], $field = ['user_id', 'mobile', 'nick', 'avatar'])
     {
-        $this->userData = self::query()->select($field)->wherein('user_id', $arrUids)->get()->toArray();
-        return $this->userData;
+        return self::query()->select($field)->wherein('user_id', $arrUids)->get()->toArray();
     }
 
     /*************** *************/
