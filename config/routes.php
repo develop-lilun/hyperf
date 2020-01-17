@@ -49,6 +49,8 @@ Router::addGroup('/api/', function () {
     Router::get('v1/article_platform/list_all', [\App\Controller\Api\V1\Article\ArticleController::class, 'articlePlatformListAll']);
     Router::get('v1/article_tag/list_all', [\App\Controller\Api\V1\Article\ArticleController::class, 'articleTagListAll']);
     Router::addRoute(['get', 'post'], 'v1/article/capture_sync', [\App\Controller\Api\V1\Article\ArticleController::class, 'captureArticleSync']);
+    Router::get('v1/search/list', [\App\Controller\Api\V1\SearchController::class, 'list']);
+
 
 }, ['middleware' => [UserVerifyMiddleware::class]]);
 
