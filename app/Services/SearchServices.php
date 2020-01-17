@@ -69,8 +69,7 @@ class SearchServices
             'imNotReal' => 5
         ];
         $client = ClientBuilder::fromConfig($clientParams, true);
-        $result= $client->search($searchParams);
-
+        $result = $client->search($searchParams);
         $list = [];
         $searchIds = [];
         if(isset($result['hits']['hits']) && $result['hits']['hits']){
@@ -99,6 +98,29 @@ class SearchServices
         // $list = $list ? $this->dataDispose($list, $userId) : $list;
 
         return ['list' => $list, 'count' => $count];
+    }
+
+    public function update()
+    {
+        $clientParams = [
+            'hosts' => ['http://192.168.7.31:9200'],
+            'retries' => 2,
+            'imNotReal' => 5
+        ];
+        $client = ClientBuilder::fromConfig($clientParams, true);
+        $searchParams = [
+            'index' => 'search_all_index',
+            'type' => 'search_all',
+            'id' => '141061',
+//            'body' => [
+//                'doc' => [
+//                    'content' => '跨境老鸟，不知道的全告诉你222'
+//                ]
+//            ],
+
+        ];
+        $result = $client->exists($searchParams);
+        return $result;
     }
 
 }

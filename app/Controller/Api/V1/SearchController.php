@@ -9,8 +9,6 @@ use App\Controller\Api\BaseController;
 use App\Services\SearchServices;
 use App\Validates\Api\SearchValidate;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\Elasticsearch\ClientBuilderFactory;
-use Hyperf\HttpServer\Request;
 
 class SearchController extends BaseController
 {
@@ -38,6 +36,16 @@ class SearchController extends BaseController
         }
 
         $result = $this->searchServices->searchAll($params);
+
+        // 搜索成功事件
+//        event(new UserSearchSuccess($params));
+
+        return $this->success($result);
+    }
+
+    public function update(){
+
+        $result = $this->searchServices->update();
 
         // 搜索成功事件
 //        event(new UserSearchSuccess($params));

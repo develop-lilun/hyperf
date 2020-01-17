@@ -50,6 +50,7 @@ Router::addGroup('/api/', function () {
     Router::get('v1/article_tag/list_all', [\App\Controller\Api\V1\Article\ArticleController::class, 'articleTagListAll']);
     Router::addRoute(['get', 'post'], 'v1/article/capture_sync', [\App\Controller\Api\V1\Article\ArticleController::class, 'captureArticleSync']);
     Router::get('v1/search/list', [\App\Controller\Api\V1\SearchController::class, 'list']);
+    Router::get('v1/search/update', [\App\Controller\Api\V1\SearchController::class, 'update']);
 
 
 }, ['middleware' => [UserVerifyMiddleware::class]]);
