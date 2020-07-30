@@ -116,7 +116,7 @@ class ArticleModel extends BaseModel
      * @param array $field
      * @return array
      */
-    public static function getFirst(int $id, array $field = ['*'])
+    public static function getFirst($id, array $field = ['*'])
     {
         $time = date('Y-m-d H:i:s');
         $result = self::query()->where(['id' => $id, 'is_disables' => 0])

@@ -77,7 +77,7 @@ class ArticleServices
             $queryDate[] = ['created_at', '<=', $params['end_time']];
         }
         if (isset($params['remark'])) {
-            $queryDate[] = ['remark', 'like', '%' . ['remark'] . '%'];
+            $queryDate[] = ['remark', 'like', '%' . $params['remark'] . '%'];
         }
 
         // 排序数据
